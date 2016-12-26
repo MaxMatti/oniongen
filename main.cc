@@ -12,7 +12,7 @@
 #include <openssl/sha.h>
 
 #define RAND_INIT 1000
-#define MAXLEN 10
+#define MAXLEN 1000
 
 template <typename T> T fastCeil(T denominator, T divisor) {
 	return (denominator + divisor - 1) / divisor;
@@ -152,9 +152,11 @@ unsigned char* sha1(const char* input_buffer, const size_t& input_buffer_size) {
 		}
 	}
 	// copying input_buffer to own storage area with larger size:
-	const size_t input_size = (input_buffer_size + 73) & 0xFFFFFFC0;
+	const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 	// 73 because 512bit blocks (64bytes) and ending in length (64bit aka 8 bytes) and 1 byte because of padding starting with 0b10000000
 	// 73 = 64 + 8 + 1
+	// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
+
 	// then applying floor function
 	unsigned char* input = (unsigned char*) calloc(input_size, sizeof(unsigned char));
 	if (!input) {
@@ -173,8 +175,8 @@ unsigned char* sha1(const char* input_buffer, const size_t& input_buffer_size) {
 		}
 		memcpy(input + input_size - 8, &tmp, 8);
 		// These are to check wether the input string was corrupted:
-		std::string a(reinterpret_cast<char*>(input), input_size);
-		std::cerr << base16(a) << std::endl;
+		// std::string a(reinterpret_cast<char*>(input), input_size);
+		// std::cerr << base16(a) << std::endl;
 	}
 	
 	// 6.1 actual hash algorithm:
@@ -218,7 +220,7 @@ unsigned char* sha1(const char* input_buffer, const size_t& input_buffer_size) {
 			tmp[0] = sha1_helper_s(tmp[1], 5) + sha1_helper_f(j, tmp[2], tmp[3], tmp[4]) + tmp[5] + current_block[j] + sha1_helper_K(j);
 			tmp[5] = tmp[4];
 			tmp[4] = tmp[3];
-			tmp[3] = sha1_helper_s(30, tmp[2]);
+			tmp[3] = sha1_helper_s(tmp[2], 30);
 			tmp[2] = tmp[1];
 			tmp[1] = tmp[0];
 		}
@@ -248,9 +250,13 @@ int main() {
 	srand(RAND_INIT);
 	std::string tmp;
 	unsigned char hash[20];
+	unsigned char* own_hash;
 	for (size_t i = 0; i < MAXLEN; ++i) {
 		tmp = getRandomStr(i);
 		SHA1(reinterpret_cast<const unsigned char*>(tmp.c_str()), tmp.size(), hash);
-		std::cout << "\"" << base16(hash) << "\" - \"" << base16(sha1(tmp)) << "\": \"" << tmp << "\"" << std::endl;
+		own_hash = sha1(tmp.c_str(), tmp.size());
+		if (memcmp(hash, own_hash, 20) != 0) {
+			std::cerr << i << ": \"" << base16(hash) << "\" - \"" << base16(own_hash) << "\": \"" << tmp << "\"" << std::endl;
+		}
 	}
 }
