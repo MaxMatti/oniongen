@@ -12,7 +12,9 @@
 #include <openssl/sha.h>
 
 #define RAND_INIT 1000
-#define MAXLEN 1000
+#define MAX_LEN 100000
+#define LEN_STEPS 32
+#define TRIES_PER_LEN 1000
 
 template <typename T> T fastCeil(T denominator, T divisor) {
 	return (denominator + divisor - 1) / divisor;
@@ -236,6 +238,9 @@ unsigned char* sha1(const char* input_buffer, const size_t& input_buffer_size) {
 	for (size_t j = 0; j < 5 && convert_endians; ++j) {
 		result[j] = swap_endian<std::uint32_t>(result[j]);
 	}
+	// free memory
+	free(input);
+	free(current_block);
 	return reinterpret_cast<unsigned char*>(result);
 }
 
@@ -251,12 +256,27 @@ int main() {
 	std::string tmp;
 	unsigned char hash[20];
 	unsigned char* own_hash;
-	for (size_t i = 0; i < MAXLEN; ++i) {
+	for (size_t i = 0; i < MAX_LEN; i += LEN_STEPS) {
 		tmp = getRandomStr(i);
-		SHA1(reinterpret_cast<const unsigned char*>(tmp.c_str()), tmp.size(), hash);
-		own_hash = sha1(tmp.c_str(), tmp.size());
-		if (memcmp(hash, own_hash, 20) != 0) {
-			std::cerr << i << ": \"" << base16(hash) << "\" - \"" << base16(own_hash) << "\": \"" << tmp << "\"" << std::endl;
+		// Time measuring code comes from http://stackoverflow.com/a/17440673
+		clock_t openssl_time = clock();
+		for (size_t j = 0; j < TRIES_PER_LEN; ++j) {
+			SHA1(reinterpret_cast<const unsigned char*>(tmp.c_str()), tmp.size(), hash);
 		}
+		openssl_time = clock() - openssl_time;
+		clock_t own_time = clock();
+		for (size_t j = 0; j < TRIES_PER_LEN; ++j) {
+			own_hash = sha1(tmp.c_str(), tmp.size());
+			free(own_hash);
+		}
+		own_time = clock() - own_time;
+		// std::cout << "Time for length " << i << ":\nOpenSSL: " << ((float) openssl_time) / CLOCKS_PER_SEC << ", Own: " << ((float) own_time) / CLOCKS_PER_SEC << std::endl;
+		std::cout << i << "\t" << ((float) openssl_time) / CLOCKS_PER_SEC << "\t" << ((float) own_time) / CLOCKS_PER_SEC << std::endl;
+		if (i % (20 * LEN_STEPS) == 0) {
+			std::cerr << i << "\r";
+		}
+		/*if (memcmp(hash, own_hash, 20) != 0) {
+			std::cerr << "Hash error at length " << i << ": \"" << base16(hash) << "\" - \"" << base16(own_hash) << "\": \"" << base16(tmp) << "\"" << std::endl;
+		}*/
 	}
 }
