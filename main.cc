@@ -42,15 +42,19 @@ int main() {
 	// start benchmark
 	control_structure::benchmark_comparison("\t", "\n", functions, lengths, std::cout, std::chrono::duration<double>(0.1));
 	*/
-	
+
+	// init
 	unsigned char* input_buffer;
 	unsigned char* output;
 	size_t amount_inputs = 256;
-	
 	srand(RAND_INIT);
+
+	// print header output
 	std::cout << std::setprecision(5) << std::fixed;
 	std::cout << "CPU\t\tGPU preparation\tGPU running\tGPU cleaning\n";
 	std::cout << "CPU\tWall\tCPU\tWall\tCPU\tWall\tCPU\tWall\n";
+
+	// iterate over input lengths, init input with random values and run benchmark for each
 	for (size_t i = 32; i < 200; i += 32) {
 		input_buffer = (unsigned char*) malloc(sizeof(unsigned char) * i * amount_inputs);
 		output = (unsigned char*) malloc(sizeof(unsigned char) * 20 * amount_inputs);

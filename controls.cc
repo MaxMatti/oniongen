@@ -38,6 +38,7 @@ namespace control_structure {
 		start_wall_time = std::chrono::system_clock::now();
 		start_cpu_time = std::clock();
 
+		// run benchmark for own CPU implementation for comparison
 		for (size_t i = 0; i < amount_inputs; ++i) {
 			own_first_cpu_reference::sha1(input_buffer + input_size * i, input_size, output + 20 * i);
 		}
@@ -60,6 +61,7 @@ namespace control_structure {
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);
 
+			// init gpu memory and copy stuff to gpu
 			own_first_gpu_reference::sha1_prepare(input_buffer, &d_input_buffer, input_size, output, &d_output, amount_inputs);
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);
@@ -78,6 +80,7 @@ namespace control_structure {
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);
 
+			// run kernels
 			own_first_gpu_reference::sha1(input_buffer, input_size, output, amount_inputs);
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);
@@ -96,6 +99,7 @@ namespace control_structure {
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);
 
+			// copy back from and free gpu memory
 			own_first_gpu_reference::sha1_cleanup(input_buffer, d_input_buffer, input_size, output, d_output, amount_inputs);
 
 			printf("\nGPU Pointers: %d/%d\n", d_input_buffer, d_output);

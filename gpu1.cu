@@ -195,12 +195,16 @@ namespace own_first_gpu_reference {
 		size_t free_byte, total_byte;
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
+
 		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, input_buffer_size * threads * sizeof(char)));
 		CUDA_CHECK_FATAL(cudaMalloc(d_output, 20 * threads * sizeof(char)));
+
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
+
 		CUDA_CHECK_FATAL(cudaMemcpy(*d_input_buffer, h_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyHostToDevice));
-		CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
+		// CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
+
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
 	}
@@ -209,6 +213,7 @@ namespace own_first_gpu_reference {
 		unsigned int blocksize = 256;
 		dim3 dimBlock(blocksize);
 		dim3 dimGrid(helpers::fastCeil(threads, blocksize));
+
 		d_sha1<<<dimGrid, dimBlock>>>(input_buffer, input_buffer_size, output, threads);
 		//std::cerr << blocksize << "\t" << helpers::fastCeil(threads, blocksize) << std::endl;
 		CUDA_CHECK_KERNEL(0);
@@ -218,12 +223,16 @@ namespace own_first_gpu_reference {
 		size_t free_byte, total_byte;
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
-		CUDA_CHECK_FATAL(cudaMemcpy(h_input_buffer, d_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
+
+		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
 		CUDA_CHECK_FATAL(cudaMemcpy(h_output, d_output, 20 * threads * sizeof(char), cudaMemcpyDeviceToHost));
+
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
+
 		CUDA_CHECK_FATAL(cudaFree(d_input_buffer));
 		CUDA_CHECK_FATAL(cudaFree(d_output));
+
 		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
 		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
 	}
