@@ -3,14 +3,12 @@
 #include <cryptopp/base64.h>
 #include <cryptopp/files.h>
 
+#include "cryptopp.h"
 #include "defines.h"
 
 using namespace CryptoPP;
 using namespace std;
 namespace crypto {
-
-    typedef AutoSeededRandomPool Rng;
-    typedef RSA::PrivateKey PrivateKey;
 
     /**
      * @brief Generate new Key
@@ -51,14 +49,14 @@ namespace crypto {
         return rsaPub;
     }
 }
-
+/*
 int main() {
-    /*
+
     crypto::Rng rng;
     crypto::PrivateKey rsa = crypto::generateKey(rng);
     cout << crypto::getPrivateKey(rsa) << endl;
     cout << crypto::getPublicKey(rsa) << endl;
-    cout << crypto::getPublicKey(rsa).length() <<endl;
-    */
+    cout << crypto::getPrivateKey(rsa).length() <<endl;
+
     return 0;
-}
+}*/
