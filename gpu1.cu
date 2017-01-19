@@ -114,8 +114,11 @@ namespace own_first_gpu_reference {
 		// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
 
 		unsigned char* input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
+		while (input == NULL) {
+			input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
+		}
 		memcpy(input, input_buffer + x * input_buffer_size, input_buffer_size);
-		
+
 		// 4. filling up input buffer according to spec
 		*(input + input_buffer_size) = 0x80; // set first bit to 1, others to 0
 		// start scope because we don't need those variables later:
@@ -131,9 +134,9 @@ namespace own_first_gpu_reference {
 			// std::string a(reinterpret_cast<char*>(input), input_size);
 			// std::cerr << base16(a) << std::endl;
 		}
-		
+
 		// 6.1 actual hash algorithm:
-		
+
 		// initializing result buffer (h0-h4):
 		std::uint32_t* result = reinterpret_cast<std::uint32_t*>(output);
 		result[0] = 0x67452301;
@@ -141,14 +144,14 @@ namespace own_first_gpu_reference {
 		result[2] = 0x98badcfe;
 		result[3] = 0x10325476;
 		result[4] = 0xc3d2e1f0;
-		
+
 		// initializing block buffer, tmp "word" and "words" A-E as described in 6.2
 		std::uint32_t current_block[80];
 		std::uint32_t tmp[] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
-		
+
 		// processing block by block
 		for (size_t i = 0; i < input_size; i += 64) {
-			
+
 			// copy current block to buffer
 			memcpy(current_block, input + i, 64);
 
@@ -156,15 +159,15 @@ namespace own_first_gpu_reference {
 			for (size_t j = 0; j < 64 && convert_endians; ++j) {
 				current_block[j] = swap_endian(current_block[j]);
 			}
-			
+
 			// 6.2 (b) calculate the rest of the current block
 			for (size_t j = 16; j < 80; ++j) {
 				current_block[j] = sha1_helper_s(current_block[j - 3] ^ current_block[j - 8] ^ current_block[j - 14] ^ current_block[j - 16], 1);
 			}
-			
+
 			// 6.2 (c) fill a-e
 			memcpy(tmp + 1, result, 5 * sizeof(int32_t));
-			
+
 			// 6.2 (d) wobble around
 			for (unsigned char j = 0; j < 80; ++j) {
 				tmp[0] = sha1_helper_s(tmp[1], 5) + sha1_helper_f(j, tmp[2], tmp[3], tmp[4]) + tmp[5] + current_block[j] + sha1_helper_K(j);
@@ -188,25 +191,14 @@ namespace own_first_gpu_reference {
 		}
 		// free memory
 		free(input);
-		free(current_block);
 	}
 	
 	void sha1_prepare(unsigned char* h_input_buffer, unsigned char** d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char** d_output, unsigned int threads) {
-		size_t free_byte, total_byte;
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
-
 		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, input_buffer_size * threads * sizeof(char)));
 		CUDA_CHECK_FATAL(cudaMalloc(d_output, 20 * threads * sizeof(char)));
 
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
-
 		CUDA_CHECK_FATAL(cudaMemcpy(*d_input_buffer, h_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyHostToDevice));
 		// CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
-
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
 	}
 	
 	void sha1(const unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
@@ -220,20 +212,10 @@ namespace own_first_gpu_reference {
 	}
 	
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
-		size_t free_byte, total_byte;
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
-
 		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
 		CUDA_CHECK_FATAL(cudaMemcpy(h_output, d_output, 20 * threads * sizeof(char), cudaMemcpyDeviceToHost));
 
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
-
 		CUDA_CHECK_FATAL(cudaFree(d_input_buffer));
 		CUDA_CHECK_FATAL(cudaFree(d_output));
-
-		CUDA_CHECK(cudaMemGetInfo(&free_byte, &total_byte));
-		std::cout << "Memory stats: " << free_byte << "/" << total_byte << "\n";
 	}
 }

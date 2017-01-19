@@ -22,24 +22,15 @@ namespace helpers {
 
 	// converts byte-string to base16-string
 	std::string base16(std::string input);
-
-	// converts byte-string to base16-string
 	std::string base16(const char* input);
-
-	// converts byte-string to base16-string
 	std::string base16(const unsigned char* input);
 
 	// converts byte-string to base32-string
 	std::string base32(std::string input, char padding);
-
-	// converts byte-string to base32-string
 	std::string base32(std::string input);
-
-	// converts byte-string to base32-string
 	std::string base32(const char* input);
-
-	// converts byte-string to base32-string
 	std::string base32(const unsigned char* input);
+	std::string base32(const unsigned char* input, size_t length);
 }
 
 #endif

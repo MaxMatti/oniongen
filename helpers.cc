@@ -103,5 +103,11 @@ namespace helpers {
 		std::string input_str(reinterpret_cast<const char*>(input));
 		return base32(input_str, '=');
 	}
+
+	// converts byte-string to base32-string
+	std::string base32(const unsigned char* input, size_t length) {
+		std::string input_str(reinterpret_cast<const char*>(input), length);
+		return base32(input_str, '=');
+	}
 }
 
