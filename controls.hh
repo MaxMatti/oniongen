@@ -19,9 +19,12 @@
 #define __CONTROLS_HH__
 
 namespace control_structure {
+	
+	void allocate_resources(size_t total_input_size, size_t total_output_size, unsigned char** h_input_buffer, unsigned char** h_output_buffer, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
+	void free_resources(size_t total_input_size, size_t total_output_size, unsigned char** h_input_buffer, unsigned char** h_output_buffer, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
+	
 	//this function does the benchmark and prints out its results
-	void benchmark_comparison(std::string value_separator, std::string line_separator, std::ostream& output_stream, unsigned char* input_buffer, size_t input_size, size_t amount_inputs, unsigned char* output);
-	void benchmark_comparison(std::string value_separator, std::string line_separator, std::unordered_map<std::string, std::function<void(const unsigned char*, const size_t, unsigned char*)>> hash_functions, std::map<size_t, size_t> input_lengths, std::ostream& output_stream, std::chrono::duration<double> time_penalty);
+	void benchmark_comparison(std::string value_separator, std::string line_separator, std::ostream& output_stream, size_t input_size, size_t amount_inputs, unsigned char* input_buffer, unsigned char* output, unsigned char* d_input_buffer, unsigned char* d_output);
 }
 
 #endif

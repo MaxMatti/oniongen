@@ -147,7 +147,7 @@ namespace own_first_gpu_reference {
 		// 6.1 actual hash algorithm:
 
 		// initializing result buffer (h0-h4):
-		std::uint32_t* result = reinterpret_cast<std::uint32_t*>(output);
+		std::uint32_t result[5];
 		result[0] = 0x67452301;
 		result[1] = 0xefcdab89;
 		result[2] = 0x98badcfe;
@@ -156,7 +156,7 @@ namespace own_first_gpu_reference {
 
 		// initializing block buffer, tmp "word" and "words" A-E as described in 6.2
 		std::uint32_t current_block[80];
-		std::uint32_t tmp[] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
+		std::uint32_t tmp[6] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
 
 		// processing block by block
 		for (size_t i = 0; i < input_size; i += 64) {
@@ -187,7 +187,7 @@ namespace own_first_gpu_reference {
 				tmp[1] = tmp[0];
 			}
 
-			// 6.2 (e) wobble around a little bit more
+			// 6.2 (e) write output of wobbling on top of current result
 			result[0] += tmp[1];
 			result[1] += tmp[2];
 			result[2] += tmp[3];
@@ -198,20 +198,26 @@ namespace own_first_gpu_reference {
 		for (size_t j = 0; j < 5 && convert_endians; ++j) {
 			result[j] = swap_endian(result[j]);
 		}
+		// write result to output buffer
+		memcpy(output, result, 5 * sizeof(std::uint32_t));
 	}
-	
-	void sha1_prepare(unsigned char* h_input_buffer, unsigned char** d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char** d_output, unsigned int threads) {
+
+	void sha1_allocate(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
+		CUDA_CHECK(cudaSetDevice(0));
+		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, total_input_size));
+		CUDA_CHECK_FATAL(cudaMalloc(d_output_buffer, total_output_size));
+	}
+
+	void sha1_prepare(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
 		const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
-		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, input_size * threads * sizeof(char)));
-		CUDA_CHECK_FATAL(cudaMalloc(d_output, 20 * threads * sizeof(char)));
 
 		/*for (size_t i = 0; i < threads; ++i) {
 			CUDA_CHECK_FATAL(cudaMemcpy((*d_input_buffer) + i * input_size, h_input_buffer + i * input_buffer_size, input_buffer_size * sizeof(char), cudaMemcpyHostToDevice));
 		}*/
-		CUDA_CHECK_FATAL(cudaMemcpy(*d_input_buffer, h_input_buffer, input_size * threads * sizeof(char), cudaMemcpyHostToDevice));
+		CUDA_CHECK_FATAL(cudaMemcpy(d_input_buffer, h_input_buffer, input_size * threads * sizeof(char), cudaMemcpyHostToDevice));
 		// CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
 	}
-	
+
 	void sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
 		unsigned int blocksize = 256;
 		dim3 dimBlock(blocksize);
@@ -221,13 +227,16 @@ namespace own_first_gpu_reference {
 		//std::cerr << blocksize << "\t" << helpers::fastCeil(threads, blocksize) << std::endl;
 		CUDA_CHECK_KERNEL(0);
 	}
-	
+
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
 		// const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
 		CUDA_CHECK_FATAL(cudaMemcpy(h_output, d_output, 20 * threads * sizeof(char), cudaMemcpyDeviceToHost));
+	}
 
-		CUDA_CHECK_FATAL(cudaFree(d_input_buffer));
-		CUDA_CHECK_FATAL(cudaFree(d_output));
+	void sha1_free(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
+		CUDA_CHECK(cudaFree(*d_input_buffer));
+		CUDA_CHECK(cudaFree(*d_output_buffer));
+		CUDA_CHECK(cudaDeviceReset());
 	}
 }

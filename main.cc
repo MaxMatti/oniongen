@@ -22,8 +22,8 @@
 
 #define RAND_INIT 1000
 #define MAX_LEN 1000
-#define LEN_STEPS 32
-#define TRIES_PER_LEN 1000
+#define LEN_STEPS 63
+#define TRIES_PER_LEN 65536
 
 int main() {
 /*
@@ -44,8 +44,10 @@ int main() {
 	*/
 
 	// init
-	unsigned char* input_buffer = (unsigned char*) malloc(1);
-	unsigned char* output = (unsigned char*) malloc(1);
+	unsigned char* h_input_buffer;
+	unsigned char* h_output;
+	unsigned char* d_input_buffer;
+	unsigned char* d_output;
 	size_t amount_inputs = TRIES_PER_LEN;
 	srand(RAND_INIT);
 
@@ -54,15 +56,20 @@ int main() {
 	std::cout << "CPU\t\tGPU preparation\tGPU running\tGPU cleaning\n";
 	std::cout << "CPU\tWall\tCPU\tWall\tCPU\tWall\tCPU\tWall\n";
 
+	// allocate resources
+	control_structure::allocate_resources(amount_inputs * ((MAX_LEN + 72) & 0xFFFFFFC0), amount_inputs * 20, &h_input_buffer, &h_output, &d_input_buffer, &d_output);
+
 	// iterate over input lengths, init input with random values and run benchmark for each
-	for (size_t i = LEN_STEPS; i < MAX_LEN; i += LEN_STEPS) {
+	for (size_t i = 32; i < MAX_LEN; i += 32) {
 		const size_t input_size = (i + 72) & 0xFFFFFFC0;
-		input_buffer = (unsigned char*) realloc(input_buffer, sizeof(unsigned char) * input_size * amount_inputs);
-		output = (unsigned char*) realloc(output, sizeof(unsigned char) * 20 * amount_inputs);
+		// h_input_buffer = (unsigned char*) realloc(h_input_buffer, sizeof(unsigned char) * input_size * amount_inputs);
+		// output = (unsigned char*) realloc(output, sizeof(unsigned char) * 20 * amount_inputs);
 		for (size_t j = 0; j < input_size * amount_inputs; ++j) {
-			// input_buffer[j] = ' ' + random() % 94;
-			input_buffer[j] = (unsigned char) (j / (i << 1)) + ' ';
+			h_input_buffer[j] = ' ' + random() % 94;
+			// h_input_buffer[j] = (unsigned char) (j / (i << 1)) + ' ';
 		}
-		control_structure::benchmark_comparison("\t", "\n", std::cout, input_buffer, i, amount_inputs, output);
+		control_structure::benchmark_comparison("\t", "\n", std::cout, i, amount_inputs, h_input_buffer, h_output, d_input_buffer, d_output);
 	}
+	
+	control_structure::free_resources(amount_inputs * ((MAX_LEN + 72) & 0xFFFFFFC0), amount_inputs * 20, &h_input_buffer, &h_output, &d_input_buffer, &d_output);
 }

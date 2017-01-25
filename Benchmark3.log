@@ -1,4 +1,4 @@
-# Third Benchmark results, showing current commit (second working commit) where we allocate padding on CPU and then use that in GPU- and CPU-Version.
+# Benchmark results of commit 1bcfc511ca33f5288dc6be56ae11a8205f552fe7 (first malloc optimizations and memcpy optimizations) in PC E06920
 s8706680@e06920:~/Projekte/5CUDA/oniongen$ nvcc -std=c++11 -D_MWAITXINTRIN_H_INCLUDED -o main main.cc controls.cc cpu1.cc gpu1.cu helpers.cc
 s8706680@e06920:~/Projekte/5CUDA/oniongen$ ./main
 CPU		GPU preparation	GPU running	GPU cleaning
