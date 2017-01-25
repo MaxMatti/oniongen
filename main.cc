@@ -23,7 +23,7 @@
 #define RAND_INIT 1000
 #define MAX_LEN 1000
 #define LEN_STEPS 63
-#define TRIES_PER_LEN 8192
+#define TRIES_PER_LEN 65536
 
 int main() {
 /*
