@@ -86,6 +86,7 @@ namespace own_first_cpu_reference {
 		if (!input) {
 			return;
 		} // return nullptr if calloc failed.
+		memset(input, 0, input_size*sizeof(char));
 		std::memcpy(input, input_buffer, input_buffer_size);
 		
 		// 4. filling up input buffer according to spec

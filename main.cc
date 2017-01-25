@@ -46,7 +46,7 @@ int main() {
 	// init
 	unsigned char* input_buffer = (unsigned char*) malloc(1);
 	unsigned char* output = (unsigned char*) malloc(1);
-	size_t amount_inputs = 64;
+	size_t amount_inputs = 1024;
 	srand(RAND_INIT);
 
 	// print header output
@@ -55,12 +55,12 @@ int main() {
 	std::cout << "CPU\tWall\tCPU\tWall\tCPU\tWall\tCPU\tWall\n";
 
 	// iterate over input lengths, init input with random values and run benchmark for each
-	for (size_t i = 2; i < MAX_LEN; i += 2) {
+	for (size_t i = 32; i < MAX_LEN; i += 32) {
 		input_buffer = (unsigned char*) realloc(input_buffer, sizeof(unsigned char) * i * amount_inputs);
 		output = (unsigned char*) realloc(output, sizeof(unsigned char) * 20 * amount_inputs);
 		for (size_t j = 0; j < i * amount_inputs; ++j) {
-			//input_buffer[j] = ' ' + random() % 94;
-			input_buffer[j] = (unsigned char) (j / (i << 1)) + ' ';
+			input_buffer[j] = ' ' + random() % 94;
+			// input_buffer[j] = (unsigned char) (j / (i << 1)) + ' ';
 		}
 		control_structure::benchmark_comparison("\t", "\n", std::cout, input_buffer, i, amount_inputs, output);
 	}
