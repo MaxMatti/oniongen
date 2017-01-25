@@ -147,7 +147,7 @@ namespace own_first_gpu_reference {
 		// 6.1 actual hash algorithm:
 
 		// initializing result buffer (h0-h4):
-		std::uint32_t* result = reinterpret_cast<std::uint32_t*>(output);
+		std::uint32_t result[5];
 		result[0] = 0x67452301;
 		result[1] = 0xefcdab89;
 		result[2] = 0x98badcfe;
@@ -156,7 +156,7 @@ namespace own_first_gpu_reference {
 
 		// initializing block buffer, tmp "word" and "words" A-E as described in 6.2
 		std::uint32_t current_block[80];
-		std::uint32_t tmp[] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
+		std::uint32_t tmp[6] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
 
 		// processing block by block
 		for (size_t i = 0; i < input_size; i += 64) {
@@ -187,7 +187,7 @@ namespace own_first_gpu_reference {
 				tmp[1] = tmp[0];
 			}
 
-			// 6.2 (e) wobble around a little bit more
+			// 6.2 (e) write output of wobbling on top of current result
 			result[0] += tmp[1];
 			result[1] += tmp[2];
 			result[2] += tmp[3];
@@ -198,6 +198,8 @@ namespace own_first_gpu_reference {
 		for (size_t j = 0; j < 5 && convert_endians; ++j) {
 			result[j] = swap_endian(result[j]);
 		}
+		// write result to output buffer
+		memcpy(output, result, 5 * sizeof(std::uint32_t));
 	}
 
 	void sha1_allocate(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {

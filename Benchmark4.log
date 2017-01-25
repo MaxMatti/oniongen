@@ -1,4 +1,4 @@
-# Benchmark results of 5840a11d42d5580727bd80c1f994b1ca398b87c4 (more memcpy optimizations) in PC E06920
+# Benchmark results of commit 5840a11d42d5580727bd80c1f994b1ca398b87c4 (more memcpy optimizations) in PC E06920
 s8706680@e06920:~/Projekte/5CUDA/oniongen$ nvcc -std=c++11 -D_MWAITXINTRIN_H_INCLUDED -o main main.cc controls.cc cpu1.cc gpu1.cu helpers.cc
 s8706680@e06920:~/Projekte/5CUDA/oniongen$ ./main
 CPU		GPU preparation	GPU running	GPU cleaning

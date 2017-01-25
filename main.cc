@@ -22,8 +22,8 @@
 
 #define RAND_INIT 1000
 #define MAX_LEN 1000
-#define LEN_STEPS 32
-#define TRIES_PER_LEN 1000
+#define LEN_STEPS 63
+#define TRIES_PER_LEN 8192
 
 int main() {
 /*
@@ -48,7 +48,7 @@ int main() {
 	unsigned char* h_output;
 	unsigned char* d_input_buffer;
 	unsigned char* d_output;
-	size_t amount_inputs = 1024;
+	size_t amount_inputs = TRIES_PER_LEN;
 	srand(RAND_INIT);
 
 	// print header output
