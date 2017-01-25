@@ -26,7 +26,7 @@ namespace own_first_cpu_reference {
 	std::uint32_t sha1_helper_K(unsigned char nr);
 
 	// calculates the sha1 sum
-	void sha1(const unsigned char* input_buffer, const size_t& input_buffer_size, unsigned char* output);
+	void sha1(unsigned char* input_buffer, const size_t& input_buffer_size, unsigned char* output);
 }
 
 #endif

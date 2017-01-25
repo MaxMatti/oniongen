@@ -31,11 +31,11 @@ namespace own_first_gpu_reference {
 	__device__ std::uint32_t sha1_helper_K(unsigned char nr);
 
 	// calculates the sha1 sum
-	__global__ void d_sha1(const unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
+	__global__ void d_sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
 	
 	void sha1_prepare(unsigned char* h_input_buffer, unsigned char** d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char** d_output, unsigned int threads);
 	
-	void sha1(const unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
+	void sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
 	
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
 }

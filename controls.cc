@@ -25,7 +25,8 @@
 namespace control_structure {
 
 	//this function does the benchmark and prints out its results
-	void benchmark_comparison(std::string value_separator, std::string line_separator, std::ostream& output_stream, unsigned char* input_buffer, size_t input_size, size_t amount_inputs, unsigned char* output) {
+	void benchmark_comparison(std::string value_separator, std::string line_separator, std::ostream& output_stream, unsigned char* input_buffer, size_t input_buffer_size, size_t amount_inputs, unsigned char* output) {
+		const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 		value_separator = "\t";
 		
 		// initializing variables for benchmarks
@@ -42,7 +43,7 @@ namespace control_structure {
 
 		// run benchmark for own CPU implementation for comparison
 		for (size_t i = 0; i < amount_inputs; ++i) {
-			own_first_cpu_reference::sha1(input_buffer + input_size * i, input_size, h_output + 20 * i);
+			own_first_cpu_reference::sha1(input_buffer + input_size * i, input_buffer_size, h_output + 20 * i);
 		}
 
 		// "stopping" stopwatch
@@ -61,7 +62,7 @@ namespace control_structure {
 		unsigned char* d_output;
 
 		// init gpu memory and copy stuff to gpu
-		own_first_gpu_reference::sha1_prepare(input_buffer, &d_input_buffer, input_size, output, &d_output, amount_inputs);
+		own_first_gpu_reference::sha1_prepare(input_buffer, &d_input_buffer, input_buffer_size, output, &d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();
@@ -76,7 +77,7 @@ namespace control_structure {
 		start_cpu_time = std::clock();
 
 		// run kernels
-		own_first_gpu_reference::sha1(d_input_buffer, input_size, d_output, amount_inputs);
+		own_first_gpu_reference::sha1(d_input_buffer, input_buffer_size, d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();
@@ -91,7 +92,7 @@ namespace control_structure {
 		start_cpu_time = std::clock();
 
 		// copy back from and free gpu memory
-		own_first_gpu_reference::sha1_cleanup(input_buffer, d_input_buffer, input_size, output, d_output, amount_inputs);
+		own_first_gpu_reference::sha1_cleanup(input_buffer, d_input_buffer, input_buffer_size, output, d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();
@@ -107,7 +108,7 @@ namespace control_structure {
 			std::cerr << "Inconsistent output!\n";
 			for (size_t i = 0; i < amount_inputs; ++i) {
 				if (memcmp(output + 20 * i, h_output + 20 * i, sizeof(unsigned char) * 20)) {
-					std::cerr << std::string((const char*) (input_buffer + input_size * i), input_size) << " does " << helpers::base32(output + 20 * i, 20) << " vs " << helpers::base32(h_output + 20 * i, 20) << "\n";
+					std::cerr << std::string((const char*) (input_buffer + input_size * i), input_buffer_size) << " does " << helpers::base32(output + 20 * i, 20) << " vs " << helpers::base32(h_output + 20 * i, 20) << "\n";
 				}
 			}
 			exit(0);
