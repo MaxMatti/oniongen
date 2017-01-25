@@ -56,9 +56,10 @@ int main() {
 
 	// iterate over input lengths, init input with random values and run benchmark for each
 	for (size_t i = 32; i < MAX_LEN; i += 32) {
-		input_buffer = (unsigned char*) realloc(input_buffer, sizeof(unsigned char) * i * amount_inputs);
+		const size_t input_size = (i + 72) & 0xFFFFFFC0;
+		input_buffer = (unsigned char*) realloc(input_buffer, sizeof(unsigned char) * input_size * amount_inputs);
 		output = (unsigned char*) realloc(output, sizeof(unsigned char) * 20 * amount_inputs);
-		for (size_t j = 0; j < i * amount_inputs; ++j) {
+		for (size_t j = 0; j < input_size * amount_inputs; ++j) {
 			input_buffer[j] = ' ' + random() % 94;
 			// input_buffer[j] = (unsigned char) (j / (i << 1)) + ' ';
 		}

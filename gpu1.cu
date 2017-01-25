@@ -89,7 +89,7 @@ namespace own_first_gpu_reference {
 	}
 
 	// calculates the sha1 sum
-	__global__ void d_sha1(const unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
+	__global__ void d_sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
 		unsigned int x = threadIdx.x + blockIdx.x * blockDim.x;
 		if (x >= threads) {
 			return;
@@ -113,6 +113,10 @@ namespace own_first_gpu_reference {
 		// 73 = 64 + 8 + 1
 		// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
 
+		unsigned char* input = input_buffer + x * input_size;
+		memset(input + input_buffer_size + 1, 0, (input_size - input_buffer_size - 5) * sizeof(char));
+
+		/*
 		unsigned char* input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
 		if (input == NULL) {
 			// input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
@@ -120,8 +124,9 @@ namespace own_first_gpu_reference {
 				output[i] = 0;
 			}
 		}
-		memset(input, 0, input_size*sizeof(char));
+		memset(input, 0, input_size * sizeof(char));
 		memcpy(input, input_buffer + x * input_buffer_size, input_buffer_size);
+		*/
 
 		// 4. filling up input buffer according to spec
 		*(input + input_buffer_size) = 0x80; // set first bit to 1, others to 0
@@ -193,19 +198,21 @@ namespace own_first_gpu_reference {
 		for (size_t j = 0; j < 5 && convert_endians; ++j) {
 			result[j] = swap_endian(result[j]);
 		}
-		// free memory
-		free(input);
 	}
 	
 	void sha1_prepare(unsigned char* h_input_buffer, unsigned char** d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char** d_output, unsigned int threads) {
-		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, input_buffer_size * threads * sizeof(char)));
+		const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
+		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, input_size * threads * sizeof(char)));
 		CUDA_CHECK_FATAL(cudaMalloc(d_output, 20 * threads * sizeof(char)));
 
-		CUDA_CHECK_FATAL(cudaMemcpy(*d_input_buffer, h_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyHostToDevice));
+		/*for (size_t i = 0; i < threads; ++i) {
+			CUDA_CHECK_FATAL(cudaMemcpy((*d_input_buffer) + i * input_size, h_input_buffer + i * input_buffer_size, input_buffer_size * sizeof(char), cudaMemcpyHostToDevice));
+		}*/
+		CUDA_CHECK_FATAL(cudaMemcpy(*d_input_buffer, h_input_buffer, input_size * threads * sizeof(char), cudaMemcpyHostToDevice));
 		// CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
 	}
 	
-	void sha1(const unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
+	void sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads) {
 		unsigned int blocksize = 256;
 		dim3 dimBlock(blocksize);
 		dim3 dimGrid(helpers::fastCeil(threads, blocksize));
@@ -216,7 +223,8 @@ namespace own_first_gpu_reference {
 	}
 	
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
-		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_buffer_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
+		// const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
+		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
 		CUDA_CHECK_FATAL(cudaMemcpy(h_output, d_output, 20 * threads * sizeof(char), cudaMemcpyDeviceToHost));
 
 		CUDA_CHECK_FATAL(cudaFree(d_input_buffer));

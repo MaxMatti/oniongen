@@ -62,7 +62,7 @@ namespace own_first_cpu_reference {
 	}
 
 	// calculates the sha1 sum
-	void sha1(const unsigned char* input_buffer, const size_t& input_buffer_size, unsigned char* output) {
+	void sha1(unsigned char* input_buffer, const size_t& input_buffer_size, unsigned char* output) {
 		// in case the machine uses big endian we need to swap some bytes later:
 		bool convert_endians;
 		{
@@ -82,12 +82,8 @@ namespace own_first_cpu_reference {
 		// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
 
 		// then applying floor function
-		unsigned char* input = (unsigned char*) calloc(input_size, sizeof(unsigned char));
-		if (!input) {
-			return;
-		} // return nullptr if calloc failed.
-		memset(input, 0, input_size*sizeof(char));
-		std::memcpy(input, input_buffer, input_buffer_size);
+		unsigned char* input = input_buffer;
+		memset(input + input_buffer_size + 1, 0, (input_size - input_buffer_size - 5) * sizeof(char));
 		
 		// 4. filling up input buffer according to spec
 		*(input + input_buffer_size) = 0x80; // set first bit to 1, others to 0
@@ -162,7 +158,6 @@ namespace own_first_cpu_reference {
 			result[j] = swap_endian<std::uint32_t>(result[j]);
 		}
 		// free memory
-		free(input);
 		free(current_block);
 	}
 }
