@@ -147,7 +147,8 @@ namespace own_first_gpu_reference {
 		// 6.1 actual hash algorithm:
 
 		// initializing result buffer (h0-h4):
-		std::uint32_t result[5];
+		// std::uint32_t result[5];
+		std::uint32_t* result = reinterpret_cast<std::uint32_t*>(output);
 		result[0] = 0x67452301;
 		result[1] = 0xefcdab89;
 		result[2] = 0x98badcfe;
@@ -199,7 +200,7 @@ namespace own_first_gpu_reference {
 			result[j] = swap_endian(result[j]);
 		}
 		// write result to output buffer
-		memcpy(output, result, 5 * sizeof(std::uint32_t));
+		//memcpy(output, result, 5 * sizeof(std::uint32_t));
 	}
 
 	void sha1_allocate(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
