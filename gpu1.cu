@@ -114,9 +114,13 @@ namespace own_first_gpu_reference {
 		// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
 
 		unsigned char* input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
-		while (input == NULL) {
-			input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
+		if (input == NULL) {
+			// input = (unsigned char*) malloc(input_size * sizeof(unsigned char));
+			for (size_t i = 0; i < 20; ++i) {
+				output[i] = 0;
+			}
 		}
+		memset(input, 0, input_size*sizeof(char));
 		memcpy(input, input_buffer + x * input_buffer_size, input_buffer_size);
 
 		// 4. filling up input buffer according to spec
