@@ -16,9 +16,9 @@
 
 void cuda_check(cudaError_t error, const char* file, int line, int fatal) {
 	if (error != cudaSuccess) {
-		printf("Caught Cuda Error: %s at %s:%d\n", cudaGetErrorString(error), file, line);
+		std::cerr << "Caught Cuda Error: " << cudaGetErrorString(error) << " at " << file << ":" << line << std::endl;
 		if (fatal) {
-			printf("Error marked as fatal, exiting.\n");
+			std::cerr << "Error marked as fatal, exiting." << std::endl;
 			exit(-1);
 		}
 	}
@@ -226,7 +226,7 @@ namespace own_first_gpu_reference {
 
 		d_sha1<<<dimGrid, dimBlock>>>(input_buffer, input_buffer_size, output, threads);
 		//std::cerr << blocksize << "\t" << helpers::fastCeil(threads, blocksize) << std::endl;
-		CUDA_CHECK_KERNEL(0);
+		CUDA_CHECK_KERNEL(1);
 	}
 
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {

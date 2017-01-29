@@ -121,9 +121,11 @@ namespace control_structure {
 		
 		if (memcmp(output, h_output, sizeof(unsigned char) * 20 * amount_inputs)) {
 			std::cerr << "Inconsistent output!\n";
-			for (size_t i = 0; i < amount_inputs; ++i) {
+			size_t errcount = 0;
+			for (size_t i = 0; i < amount_inputs && errcount < 1000; ++i) {
 				if (memcmp(output + 20 * i, h_output + 20 * i, sizeof(unsigned char) * 20)) {
 					std::cerr << i << ": " << std::string((const char*) (input_buffer + input_size * i), input_buffer_size) << " does " << helpers::base32(output + 20 * i, 20) << " vs " << helpers::base32(h_output + 20 * i, 20) << "\n";
+					++errcount;
 				}
 			}
 			exit(0);
