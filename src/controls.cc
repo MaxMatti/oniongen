@@ -41,11 +41,15 @@ namespace control_structure {
 		const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 		value_separator = "\t";
 		
+		output_stream << input_buffer_size << value_separator;
+		output_stream << amount_inputs << value_separator;
+
 		// initializing variables for benchmarks
 		std::chrono::time_point<std::chrono::system_clock> start_wall_time;
 		std::clock_t start_cpu_time;
 		std::chrono::time_point<std::chrono::system_clock> stop_wall_time;
 		std::clock_t stop_cpu_time;
+		double total_wall_time = 0;
 
 		// starting stopwatch
 		start_wall_time = std::chrono::system_clock::now();
@@ -80,6 +84,7 @@ namespace control_structure {
 		// printing results
 		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
 		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
 
 		// starting stopwatch
 		start_wall_time = std::chrono::system_clock::now();
@@ -95,6 +100,7 @@ namespace control_structure {
 		// printing results
 		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
 		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
 
 		// starting stopwatch
 		start_wall_time = std::chrono::system_clock::now();
@@ -110,14 +116,16 @@ namespace control_structure {
 		// printing results
 		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
 		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
-
-		output_stream << line_separator;
+		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
+		output_stream << total_wall_time << line_separator;
 		
 		if (memcmp(output, h_output, sizeof(unsigned char) * 20 * amount_inputs)) {
 			std::cerr << "Inconsistent output!\n";
-			for (size_t i = 0; i < amount_inputs; ++i) {
+			size_t errcount = 0;
+			for (size_t i = 0; i < amount_inputs && errcount < 1000; ++i) {
 				if (memcmp(output + 20 * i, h_output + 20 * i, sizeof(unsigned char) * 20)) {
-					std::cerr << std::string((const char*) (input_buffer + input_size * i), input_buffer_size) << " does " << helpers::base32(output + 20 * i, 20) << " vs " << helpers::base32(h_output + 20 * i, 20) << "\n";
+					std::cerr << i << ": " << std::string((const char*) (input_buffer + input_size * i), input_buffer_size) << " does " << helpers::base32(output + 20 * i, 20) << " vs " << helpers::base32(h_output + 20 * i, 20) << "\n";
+					++errcount;
 				}
 			}
 			exit(0);

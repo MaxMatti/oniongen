@@ -21,9 +21,9 @@
 #include "controls.hh"
 
 #define RAND_INIT 1000
-#define MAX_LEN 1000
-#define LEN_STEPS 63
-#define TRIES_PER_LEN 65536
+#define MAX_LEN 300
+#define LEN_STEPS 32
+#define TRIES_PER_LEN 1000000
 
 int main() {
 /*
@@ -52,9 +52,9 @@ int main() {
 	srand(RAND_INIT);
 
 	// print header output
-	std::cout << std::setprecision(5) << std::fixed;
-	std::cout << "CPU\t\tGPU preparation\tGPU running\tGPU cleaning\n";
-	std::cout << "CPU\tWall\tCPU\tWall\tCPU\tWall\tCPU\tWall\n";
+	std::cout << std::setprecision(12) << std::fixed;
+	std::cout << "Input\t\tCPU\t\t\t\tGPU preparation\t\t\tGPU running\t\t\tGPU cleaning\t\t\tGPU total\n";
+	std::cout << "Size\tTries\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tWall\n";
 
 	// allocate resources
 	control_structure::allocate_resources(amount_inputs * ((MAX_LEN + 72) & 0xFFFFFFC0), amount_inputs * 20, &h_input_buffer, &h_output, &d_input_buffer, &d_output);
