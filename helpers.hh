@@ -31,6 +31,9 @@ namespace helpers {
 	std::string base32(const char* input);
 	std::string base32(const unsigned char* input);
 	std::string base32(const unsigned char* input, size_t length);
+
+	// converts base32-string to byte-string
+	std::string base32toStr(std::string input)
 }
 
 #endif

@@ -68,19 +68,18 @@ namespace helpers {
 	std::string base32(std::string input, char padding) {
 		size_t final_output_size = fastCeil((size_t) input.size() * 8, (size_t) 5);
 		input.append(5 - input.size() % 5, 0);
-		size_t estimated_output_size = input.size() * 8 / 5;
-		std::string result(estimated_output_size, 0); // 8 bytes in a "normal" string, 5 bytes in a base32-encoded string
+		std::string result(input.size() * 8 / 5, 0); // 8 bytes in a "normal" string, 5 bytes in a base32-encoded string
 		char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
 		size_t output_pos = 0;
 		for (size_t i = 0; i < input.size(); i += 5, output_pos += 8) {
-			result[output_pos    ] = characters[(input[i] >> 3) & 31]; // 31 base10 = 11111 base2
-			result[output_pos + 1] = characters[((input[i] << 2) & 28) | ((input[i + 1] >> 6) & 3)]; // 28 base10 = 11100 base2, 3 base10 = 11 base2
-			result[output_pos + 2] = characters[(input[i + 1] >> 1) & 31]; // 31 base10 = 11111 base2
+			result[output_pos    ] = characters[( input[i    ] >> 3) & 31];                               // 31 base10 = 11111 base2
+			result[output_pos + 1] = characters[((input[i    ] << 2) & 28) | ((input[i + 1] >> 6) & 3)];  // 28 base10 = 11100 base2, 3 base10 = 11 base2
+			result[output_pos + 2] = characters[( input[i + 1] >> 1) & 31];                               // 31 base10 = 11111 base2
 			result[output_pos + 3] = characters[((input[i + 1] << 4) & 16) | ((input[i + 2] >> 4) & 15)]; // 16 base10 = 10000 base2, 15 base10 = 01111 base2
-			result[output_pos + 4] = characters[((input[i + 2] << 1) & 30) | ((input[i + 3] >> 7) & 1)]; // 30 base10 = 11110 base2, 1 base10 = 00001 base2
-			result[output_pos + 5] = characters[(input[i + 3] >> 2) & 31]; // 31 base10 = 11111 base2
-			result[output_pos + 6] = characters[((input[i + 3] << 3) & 24) | ((input[i + 4] >> 5) & 7)]; // 24 base10 = 11000 base2, 7 base10 = 00111 base2
-			result[output_pos + 7] = characters[input[i + 4] & 31]; // 31 base10 = 11111 base2
+			result[output_pos + 4] = characters[((input[i + 2] << 1) & 30) | ((input[i + 3] >> 7) & 1)];  // 30 base10 = 11110 base2, 1 base10 = 00001 base2
+			result[output_pos + 5] = characters[( input[i + 3] >> 2) & 31];                               // 31 base10 = 11111 base2
+			result[output_pos + 6] = characters[((input[i + 3] << 3) & 24) | ((input[i + 4] >> 5) & 7)];  // 24 base10 = 11000 base2, 7 base10 = 00111 base2
+			result[output_pos + 7] = characters[  input[i + 4]       & 31];                               // 31 base10 = 11111 base2
 		}
 		result.resize(final_output_size);
 		result.append(8 - result.size() % 8, padding);
@@ -108,6 +107,33 @@ namespace helpers {
 	std::string base32(const unsigned char* input, size_t length) {
 		std::string input_str(reinterpret_cast<const char*>(input), length);
 		return base32(input_str, '=');
+	}
+
+	// converts base32-string to byte-string
+	std::string base32toStr(std::string input) {
+		char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
+		size_t final_output_size = fastCeil((size_t) input.size() * 5, (size_t) 8);
+		input.append(8 - input.size() % 8, 0);
+		std::string result(input.size() / 8 * 5, 0);
+
+		// convert 2-7 so that every characters first 3 bits are 0 and the last 5 bits are a correct binary representation.
+		for (size_z i = 0; i < input.size(); ++i) {
+			if (input[i] < 64) {
+				input[i] += 41;
+			}
+			input[i] &= 31;
+		}
+
+		size_t output_pos = 0;
+		for (size_t i = 0; i < input.size(); i += 8, output_pos += 5) {
+			result[output_pos    ] = input[i    ] << 3 | input[i + 1] >> 2;
+			result[output_pos + 1] = input[i + 1] << 6 | input[i + 2] << 1 | input[i + 3] >> 4;
+			result[output_pos + 2] = input[i + 3] << 4 | input[i + 4] >> 1;
+			result[output_pos + 3] = input[i + 4] << 7 | input[i + 5] << 2 | input[i + 6] >> 3;
+			result[output_pos + 4] = input[i + 6] << 5 | input[i + 7];
+		}
+		result.resize(final_output_size);
+		return result;
 	}
 }
 
