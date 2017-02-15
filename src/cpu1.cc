@@ -20,7 +20,7 @@ namespace own_first_cpu_reference {
 			unsigned char u8[sizeof(T)];
 		} source, dest;
 		source.u = u;
-		for (size_t k = 0; k < sizeof(T); k++) {
+		for (unsigned int k = 0; k < sizeof(T); k++) {
 			dest.u8[k] = source.u8[sizeof(T) - k - 1];
 		}
 		return dest.u;
@@ -62,7 +62,7 @@ namespace own_first_cpu_reference {
 	}
 
 	// calculates the sha1 sum
-	void sha1(unsigned char* input_buffer, const size_t& input_buffer_size, unsigned char* output) {
+	void sha1(unsigned char* input_buffer, const unsigned int& input_buffer_size, unsigned char* output) {
 		// in case the machine uses big endian we need to swap some bytes later:
 		bool convert_endians;
 		{
@@ -76,7 +76,7 @@ namespace own_first_cpu_reference {
 			}
 		}
 		// copying input_buffer to own storage area with larger size:
-		const size_t input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
+		const unsigned int input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 		// 73 because 512bit blocks (64bytes) and ending in length (64bit aka 8 bytes) and 1 byte because of padding starting with 0b10000000
 		// 73 = 64 + 8 + 1
 		// but for some reason when using 73 some results differ from OpenSSLs implementation, fixed by using 72. TODO: investigate this.
@@ -118,18 +118,18 @@ namespace own_first_cpu_reference {
 		std::uint32_t tmp[] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
 		
 		// processing block by block
-		for (size_t i = 0; i < input_size; i += 64) {
+		for (unsigned int i = 0; i < input_size; i += 64) {
 			
 			// copy current block to buffer
 			memcpy(current_block, input + i, 64);
 
 			// convert endianness in case of big endian
-			for (size_t j = 0; j < 64 && convert_endians; ++j) {
+			for (unsigned int j = 0; j < 64 && convert_endians; ++j) {
 				current_block[j] = swap_endian<std::uint32_t>(current_block[j]);
 			}
 			
 			// 6.2 (b) calculate the rest of the current block
-			for (size_t j = 16; j < 80; ++j) {
+			for (unsigned int j = 16; j < 80; ++j) {
 				current_block[j] = sha1_helper_s(current_block[j - 3] ^ current_block[j - 8] ^ current_block[j - 14] ^ current_block[j - 16], 1);
 			}
 			
@@ -154,7 +154,7 @@ namespace own_first_cpu_reference {
 			result[4] += tmp[5];
 		}
 		// convert endianness in case of big endian
-		for (size_t j = 0; j < 5 && convert_endians; ++j) {
+		for (unsigned int j = 0; j < 5 && convert_endians; ++j) {
 			result[j] = swap_endian<std::uint32_t>(result[j]);
 		}
 		// free memory

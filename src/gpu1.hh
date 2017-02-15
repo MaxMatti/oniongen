@@ -31,17 +31,17 @@ namespace own_first_gpu_reference {
 	__device__ std::uint32_t sha1_helper_K(unsigned char nr);
 
 	// calculates the sha1 sum
-	__global__ void d_sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
+	__global__ void d_sha1(unsigned char* input_buffer, unsigned int input_buffer_size, unsigned char* output, unsigned int threads);
 	
-	void sha1_allocate(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
+	void sha1_allocate(unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
 	
-	void sha1_prepare(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
+	void sha1_prepare(unsigned char* h_input_buffer, unsigned char* d_input_buffer, unsigned int input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
 	
-	void sha1(unsigned char* input_buffer, size_t input_buffer_size, unsigned char* output, unsigned int threads);
+	void sha1(unsigned char* input_buffer, unsigned int input_buffer_size, unsigned char* output, unsigned int threads);
 	
-	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, size_t input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
+	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, unsigned int input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
 	
-	void sha1_free(size_t total_input_size, size_t total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
+	void sha1_free(unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
 }
 
 #endif

@@ -21,7 +21,7 @@ namespace helpers {
 	}
 
 	// returns a string with length random characters
-	std::string getRandomStr(size_t length) {
+	std::string getRandomStr(unsigned int length) {
 		static auto randchar = []() -> char {
 			return ' ' + rand() % 94;
 		};
@@ -31,11 +31,11 @@ namespace helpers {
 	}
 
 	// fills input with a random string of length length, requires allocated space of length + 1
-	void getRandomStr(size_t length, unsigned char* input) {
+	void getRandomStr(unsigned int length, unsigned char* input) {
 		static auto randchar = []() -> char {
 			return ' ' + rand() % 94;
 		};
-		for (size_t i = 0; i < length; ++i) {
+		for (unsigned int i = 0; i < length; ++i) {
 			input[i] = randchar();
 		}
 		input[length] = 0;
@@ -43,9 +43,9 @@ namespace helpers {
 
 	// converts byte-string to base16-string
 	std::string base16(std::string input) {
-		std::string result(fastCeil((size_t) input.size() * 8, (size_t) 4), 0); // 8 bytes in a "normal" string, 4 bytes in a base16-encoded (hex) string
+		std::string result(fastCeil((unsigned int) input.size() * 8, (unsigned int) 4), 0); // 8 bytes in a "normal" string, 4 bytes in a base16-encoded (hex) string
 		char characters[] = "0123456789abcdef";
-		for (size_t i = 0; i < input.size(); ++i) {
+		for (unsigned int i = 0; i < input.size(); ++i) {
 			result[i * 2] = characters[(input[i] >> 4) & 15];
 			result[i * 2 + 1] = characters[input[i] & 15];
 		}
@@ -64,14 +64,20 @@ namespace helpers {
 		return base16(input_str);
 	}
 
+	// converts byte-string to base16-string
+	std::string base16(const unsigned char* input, unsigned int length) {
+		std::string input_str(reinterpret_cast<const char*>(input), length);
+		return base16(input_str);
+	}
+
 	// converts byte-string to base32-string
 	std::string base32(std::string input, char padding) {
-		size_t final_output_size = fastCeil((size_t) input.size() * 8, (size_t) 5);
+		unsigned int final_output_size = fastCeil((unsigned int) input.size() * 8, (unsigned int) 5);
 		input.append(5 - input.size() % 5, 0);
 		std::string result(input.size() * 8 / 5, 0); // 8 bytes in a "normal" string, 5 bytes in a base32-encoded string
 		char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
-		size_t output_pos = 0;
-		for (size_t i = 0; i < input.size(); i += 5, output_pos += 8) {
+		unsigned int output_pos = 0;
+		for (unsigned int i = 0; i < input.size(); i += 5, output_pos += 8) {
 			result[output_pos    ] = characters[( input[i    ] >> 3) & 31];                               // 31 base10 = 11111 base2
 			result[output_pos + 1] = characters[((input[i    ] << 2) & 28) | ((input[i + 1] >> 6) & 3)];  // 28 base10 = 11100 base2, 3 base10 = 11 base2
 			result[output_pos + 2] = characters[( input[i + 1] >> 1) & 31];                               // 31 base10 = 11111 base2
@@ -104,7 +110,7 @@ namespace helpers {
 	}
 
 	// converts byte-string to base32-string
-	std::string base32(const unsigned char* input, size_t length) {
+	std::string base32(const unsigned char* input, unsigned int length) {
 		std::string input_str(reinterpret_cast<const char*>(input), length);
 		return base32(input_str, '=');
 	}
@@ -112,20 +118,20 @@ namespace helpers {
 	// converts base32-string to byte-string
 	std::string base32toStr(std::string input) {
 		char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
-		size_t final_output_size = fastCeil((size_t) input.size() * 5, (size_t) 8);
+		unsigned int final_output_size = fastCeil((unsigned int) input.size() * 5, (unsigned int) 8);
 		input.append(8 - input.size() % 8, 0);
 		std::string result(input.size() / 8 * 5, 0);
 
 		// convert 2-7 so that every characters first 3 bits are 0 and the last 5 bits are a correct binary representation.
-		for (size_z i = 0; i < input.size(); ++i) {
+		for (unsigned int i = 0; i < input.size(); ++i) {
 			if (input[i] < 64) {
 				input[i] += 41;
 			}
 			input[i] &= 31;
 		}
 
-		size_t output_pos = 0;
-		for (size_t i = 0; i < input.size(); i += 8, output_pos += 5) {
+		unsigned int output_pos = 0;
+		for (unsigned int i = 0; i < input.size(); i += 8, output_pos += 5) {
 			result[output_pos    ] = input[i    ] << 3 | input[i + 1] >> 2;
 			result[output_pos + 1] = input[i + 1] << 6 | input[i + 2] << 1 | input[i + 3] >> 4;
 			result[output_pos + 2] = input[i + 3] << 4 | input[i + 4] >> 1;
