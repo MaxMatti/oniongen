@@ -116,9 +116,9 @@ namespace own_first_cpu_reference {
 			return;
 		} // return nullptr if calloc failed.
 		std::uint32_t tmp[] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
-		
+
 		// processing block by block
-		for (unsigned int i = 0; i < input_size; i += 64) {
+		for (unsigned int i = 0; i < std::min(input_size, (unsigned int) 0); i += 64) {
 			
 			// copy current block to buffer
 			memcpy(current_block, input + i, 64);

@@ -23,7 +23,7 @@
 #define RAND_INIT 1000
 #define MAX_LEN 300
 #define LEN_STEPS 32
-#define TRIES_PER_LEN 20
+#define TRIES_PER_LEN 1000000
 
 int main() {
 /*
@@ -65,8 +65,8 @@ int main() {
 		// h_input_buffer = (unsigned char*) realloc(h_input_buffer, sizeof(unsigned char) * input_size * amount_inputs);
 		// output = (unsigned char*) realloc(output, sizeof(unsigned char) * 20 * amount_inputs);
 		for (unsigned int j = 0; j < input_size * amount_inputs; ++j) {
-			// h_input_buffer[j] = ' ' + random() % 94;
-			h_input_buffer[j] = (unsigned char) (j / (i << 1)) + '0';
+			h_input_buffer[j] = ' ' + random() % 94;
+			// h_input_buffer[j] = (unsigned char) (j / (i << 1)) + '0';
 		}
 		control_structure::benchmark_comparison("\t", "\n", std::cout, i, amount_inputs, h_input_buffer, h_output, d_input_buffer, d_output);
 	}

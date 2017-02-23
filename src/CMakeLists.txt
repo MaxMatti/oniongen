@@ -5,7 +5,7 @@ include(CheckCXXCompilerFlag)
 
 set(CMAKE_CXX_STANDARD 11)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  list (APPEND CMAKE_CXX_FLAGS "--std=gnu++11")
+  list (APPEND CMAKE_CXX_FLAGS "--std=gnu++11 -Wall -Wextra")
 endif ()
 
 

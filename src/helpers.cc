@@ -117,7 +117,6 @@ namespace helpers {
 
 	// converts base32-string to byte-string
 	std::string base32toStr(std::string input) {
-		char characters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789";
 		unsigned int final_output_size = fastCeil((unsigned int) input.size() * 5, (unsigned int) 8);
 		input.append(8 - input.size() % 8, 0);
 		std::string result(input.size() / 8 * 5, 0);

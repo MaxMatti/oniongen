@@ -38,12 +38,11 @@ namespace control_structure {
 
 	//this function does the benchmark and prints out its results
 	void benchmark_comparison(std::string value_separator, std::string line_separator, std::ostream& output_stream, unsigned int input_buffer_size, unsigned int amount_inputs, unsigned char* input_buffer, unsigned char* output, unsigned char* d_input_buffer, unsigned char* d_output) {
-		std::cout << "\n\n";
 		const unsigned int input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 		value_separator = "\t";
 		
-		// output_stream << input_buffer_size << value_separator;
-		// output_stream << amount_inputs << value_separator;
+		output_stream << input_buffer_size << value_separator;
+		output_stream << amount_inputs << value_separator;
 
 		// initializing variables for benchmarks
 		std::chrono::time_point<std::chrono::system_clock> start_wall_time;
@@ -78,8 +77,8 @@ namespace control_structure {
 		stop_cpu_time = std::clock();
 
 		// printing results
-		// output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
-		// output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
+		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
 
 		// "starting" stopwatch
 		start_wall_time = std::chrono::system_clock::now();
@@ -93,8 +92,8 @@ namespace control_structure {
 		stop_cpu_time = std::clock();
 		
 		// printing results
-		// output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
-		// output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
+		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
 		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
 
 		// "starting" stopwatch
@@ -109,8 +108,8 @@ namespace control_structure {
 		stop_cpu_time = std::clock();
 		
 		// printing results
-		// output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
-		// output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
+		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
 		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
 
 		// starting stopwatch
@@ -125,10 +124,10 @@ namespace control_structure {
 		stop_cpu_time = std::clock();
 		
 		// printing results
-		// output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
-		// output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
+		output_stream << ((double) stop_cpu_time - start_cpu_time) / CLOCKS_PER_SEC << value_separator;
+		output_stream << ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count() << value_separator;
 		total_wall_time += ((std::chrono::duration<double>) (stop_wall_time - start_wall_time)).count();
-		// output_stream << total_wall_time << line_separator;
+		output_stream << total_wall_time << line_separator;
 		
 		if (memcmp(output, h_output, sizeof(unsigned char) * 20 * amount_inputs)) {
 			std::cerr << "Inconsistent output!\n";

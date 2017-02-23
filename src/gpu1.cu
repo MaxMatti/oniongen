@@ -53,6 +53,10 @@ namespace own_first_gpu_reference {
 		return dest.u;
 	}
 
+	template <typename T> __host__ __device__ T min(T a, T b) {
+		return a > b ? b : a;
+	}
+
 	// implementation of the s function as described in section 3. of spec
 	__device__ std::uint32_t sha1_helper_s(std::uint32_t input, unsigned char offset) {
 		return (input << offset) | (input >> (32 - offset));
@@ -113,12 +117,11 @@ namespace own_first_gpu_reference {
 		// 72 = 63 + 8 + 1 (63 instead of 64 because we're counting from 0)
 
 		unsigned char* input = input_buffer + x * input_size;
-		if (input_size - input_buffer_size > 64) {
-			memset(input_buffer + threads * (input_size - 128) + (128 + input_buffer_size - input_size) + (x * 64) + 1, 0, (input_size - input_buffer_size - 64) * sizeof(char));
+		if (((int) input_size) - input_buffer_size > 64) {
+			memset(input_buffer + threads * (input_size - 128) + (128 + input_buffer_size - input_size) + (x * 64) + 1, 0, (((int) input_size) - input_buffer_size - 64) * sizeof(char));
 			memset(input_buffer + threads * (input_size - 64) + (x * 64), 0, 59 * sizeof(char));
 		} else {
 			memset(input_buffer + threads * (input_size - 64) + (64 + input_buffer_size - input_size) + (x * 64) + 1, 0, (input_size - input_buffer_size - 5) * sizeof(char));
-			printf("x:%d, len1:%d, len2: %d, threads:%d, pos:%d:%d:%d:%d, poslen:%d\n", x, input_buffer_size, input_size, threads, threads * (input_size - 64), (x * 64), (64 + input_buffer_size - input_size) + 1, threads * (input_size - 64) + (64 + input_buffer_size - input_size) + (x * 64) + 1, (input_size - input_buffer_size - 5));
 		}
 
 		// 4. filling up input buffer according to spec
@@ -151,10 +154,10 @@ namespace own_first_gpu_reference {
 		std::uint32_t tmp[6] = {0, 0, 0, 0, 0, 0}; // tmp and then a-e
 
 		// processing block by block
-		for (unsigned int i = 0; i < input_size; i += 64) {
+		for (unsigned int i = 0; i < min(input_size, (unsigned int) 0); i += 64) {
 
 			// copy current block to buffer
-			memcpy(current_block, input_buffer + i * threads + x * 64, 64);
+			memcpy(current_block, input_buffer + i * threads + x * 64, 64 * sizeof(unsigned char));
 
 			// convert endianness in case of big endian
 			for (unsigned int j = 0; j < 64 && convert_endians; ++j) {
