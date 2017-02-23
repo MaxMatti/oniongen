@@ -26,23 +26,6 @@
 #define TRIES_PER_LEN 1000000
 
 int main() {
-/*
-	// functions to compare in benchmark
-	std::unordered_map<std::string, std::tuple<std::function<void(unsigned char*, unsigned char**, unsigned int, unsigned char*, unsigned char**, unsigned int)>, std::function<void(const unsigned char*, const unsigned int, unsigned char*)>, std::function<void(unsigned char*, unsigned char*, unsigned int, unsigned char*, unsigned char*, unsigned int)>>> functions;
-	// functions["OpenSSL"] = openssl::SHA1;
-	functions["Own (CPU, first try)"] = {own_first_cpu_reference::sha1, own_first_cpu_reference::sha1, own_first_cpu_reference::sha1};
-	functions["Own (GPU, first try)"] = {own_first_gpu_reference::sha1_prepare, own_first_gpu_reference::sha1, own_first_gpu_reference::sha1_cleanup};
-
-	// inputs lengths in benchmark
-	std::map<unsigned int, unsigned int> lengths;
-	for (unsigned int i = 0; i < MAX_LEN; i += LEN_STEPS) {
-		lengths[i] = TRIES_PER_LEN;
-	}
-
-	// start benchmark
-	control_structure::benchmark_comparison("\t", "\n", functions, lengths, std::cout, std::chrono::duration<double>(0.1));
-	*/
-
 	// init
 	unsigned char* h_input_buffer;
 	unsigned char* h_output;
@@ -50,11 +33,6 @@ int main() {
 	unsigned char* d_output;
 	unsigned int amount_inputs = TRIES_PER_LEN;
 	srand(RAND_INIT);
-
-	// print header output
-	// std::cout << std::setprecision(12) << std::fixed;
-	// std::cout << "Input\t\tCPU\t\t\t\tGPU preparation\t\t\tGPU running\t\t\tGPU cleaning\t\t\tGPU total\n";
-	// std::cout << "Size\tTries\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tWall\n";
 
 	// allocate resources
 	control_structure::allocate_resources(amount_inputs * ((MAX_LEN + 72) & 0xFFFFFFC0), amount_inputs * 20, &h_input_buffer, &h_output, &d_input_buffer, &d_output);
