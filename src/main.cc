@@ -1,23 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
-#include <sstream>
-#include <random>
-#include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <cstring>
-#include <cstdint>
-#include <climits>
-#include <functional>
-#include <algorithm>
-#include <chrono>
 
 #include "helpers.hh"
-#include "cpu1.hh"
-#include "gpu1.hh"
+#include "cpu.hh"
+#include "gpu.hh"
 #include "controls.hh"
 
 #define RAND_INIT 1000
@@ -36,6 +22,11 @@ int main() {
 
 	// allocate resources
 	control_structure::allocate_resources(amount_inputs * ((MAX_LEN + 72) & 0xFFFFFFC0), amount_inputs * 20, &h_input_buffer, &h_output, &d_input_buffer, &d_output);
+
+	// print header output
+	std::cout << std::setprecision(12) << std::fixed;
+	std::cout << "Input\t\tCPU\t\t\t\tGPU preparation\t\t\tGPU running\t\t\tGPU cleaning\t\t\tGPU total\n";
+	std::cout << "Size\tTries\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tCPU\t\tWall\t\tWall\n";
 
 	// iterate over input lengths, init input with random values and run benchmark for each
 	for (unsigned int i = LEN_STEPS; i < MAX_LEN; i += LEN_STEPS) {

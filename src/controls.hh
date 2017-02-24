@@ -1,19 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <random>
 #include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <cstring>
-#include <cstdint>
-#include <climits>
-#include <functional>
-#include <algorithm>
 #include <chrono>
-#include <tuple>
 
 #ifndef __CONTROLS_HH__
 #define __CONTROLS_HH__

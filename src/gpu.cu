@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <sstream>
-#include <cstring>
-#include <cstdint>
-#include <climits>
-#include <cuda_runtime_api.h>
-#include <cuda.h>
 
 #include "helpers.hh"
 
@@ -24,7 +16,7 @@ void cuda_check(cudaError_t error, const char* file, int line, int fatal) {
 	}
 }
 
-namespace own_first_gpu_reference {
+namespace gpu {
 	// Swaps the endian of uint32_t variables. CUDA 7.5 doesn't like templates. Swapped "T" for "uint32_t" from http://stackoverflow.com/a/4956493
 	__device__ uint32_t swap_endian(uint32_t u) {
 		static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
@@ -195,8 +187,8 @@ namespace own_first_gpu_reference {
 		}
 	}
 
-	void sha1_allocate(unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
-		CUDA_CHECK(cudaSetDevice(0));
+	void sha1_allocate(unsigned int device, unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
+		CUDA_CHECK(cudaSetDevice(device));
 		CUDA_CHECK_FATAL(cudaMalloc(d_input_buffer, total_input_size));
 		CUDA_CHECK_FATAL(cudaMalloc(d_output_buffer, total_output_size));
 	}
@@ -204,11 +196,7 @@ namespace own_first_gpu_reference {
 	void sha1_prepare(unsigned char* h_input_buffer, unsigned char* d_input_buffer, unsigned int input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
 		const unsigned int input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
 
-		/*for (unsigned int i = 0; i < threads; ++i) {
-			CUDA_CHECK_FATAL(cudaMemcpy((*d_input_buffer) + i * input_size, h_input_buffer + i * input_buffer_size, input_buffer_size * sizeof(char), cudaMemcpyHostToDevice));
-		}*/
 		CUDA_CHECK_FATAL(cudaMemcpy(d_input_buffer, h_input_buffer, input_size * threads * sizeof(char), cudaMemcpyHostToDevice));
-		// CUDA_CHECK(cudaMemcpy(*d_output, h_output, 20 * threads * sizeof(char), cudaMemcpyHostToDevice));
 	}
 
 	void sha1(unsigned char* input_buffer, unsigned int input_buffer_size, unsigned char* output, unsigned int threads) {
@@ -217,13 +205,10 @@ namespace own_first_gpu_reference {
 		dim3 dimGrid(helpers::fastCeil(threads, blocksize));
 
 		d_sha1<<<dimGrid, dimBlock>>>(input_buffer, input_buffer_size, output, threads);
-		//std::cerr << blocksize << "\t" << helpers::fastCeil(threads, blocksize) << std::endl;
 		CUDA_CHECK_KERNEL(1);
 	}
 
 	void sha1_cleanup(unsigned char* h_input_buffer, unsigned char* d_input_buffer, unsigned int input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads) {
-		// const unsigned int input_size = (input_buffer_size + 72) & 0xFFFFFFC0;
-		// CUDA_CHECK(cudaMemcpy(h_input_buffer, d_input_buffer, input_size * threads * sizeof(char), cudaMemcpyDeviceToHost));
 		CUDA_CHECK_FATAL(cudaMemcpy(h_output, d_output, 20 * threads * sizeof(char), cudaMemcpyDeviceToHost));
 	}
 

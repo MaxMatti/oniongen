@@ -1,23 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <sstream>
-#include <random>
-#include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <cstring>
-#include <cstdint>
-#include <climits>
-#include <functional>
-#include <algorithm>
-#include <chrono>
-#include <tuple>
 
 #include "controls.hh"
-#include "cpu1.hh"
-#include "gpu1.hh"
+#include "cpu.hh"
+#include "gpu.hh"
 #include "helpers.hh"
 
 #define RAND_INIT 1000
@@ -27,13 +12,13 @@ namespace control_structure {
 	void allocate_resources(unsigned int total_input_size, unsigned int total_output_size, unsigned char** h_input_buffer, unsigned char** h_output_buffer, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
 		*h_input_buffer = (unsigned char*) malloc(total_input_size);
 		*h_output_buffer = (unsigned char*) malloc(total_output_size);
-		own_first_gpu_reference::sha1_allocate(total_input_size, total_output_size, d_input_buffer, d_output_buffer);
+		gpu::sha1_allocate(0, total_input_size, total_output_size, d_input_buffer, d_output_buffer);
 	}
 
 	void free_resources(unsigned int total_input_size, unsigned int total_output_size, unsigned char** h_input_buffer, unsigned char** h_output_buffer, unsigned char** d_input_buffer, unsigned char** d_output_buffer) {
 		free(*h_input_buffer);
 		free(*h_output_buffer);
-		own_first_gpu_reference::sha1_free(total_input_size, total_output_size, d_input_buffer, d_output_buffer);
+		gpu::sha1_free(total_input_size, total_output_size, d_input_buffer, d_output_buffer);
 	}
 
 	//this function does the benchmark and prints out its results
@@ -69,7 +54,7 @@ namespace control_structure {
 				memcpy(tmp_input + j, input_buffer + j * amount_inputs + 64 * i, 64 * sizeof(unsigned char));
 			}
 			//std::cerr << "F";
-			own_first_cpu_reference::sha1(tmp_input, input_buffer_size, h_output + 20 * i);
+			cpu::sha1(tmp_input, input_buffer_size, h_output + 20 * i);
 		}
 
 		// "stopping" stopwatch
@@ -85,7 +70,7 @@ namespace control_structure {
 		start_cpu_time = std::clock();
 
 		// init gpu memory and copy stuff to gpu
-		own_first_gpu_reference::sha1_prepare(input_buffer, d_input_buffer, input_buffer_size, output, d_output, amount_inputs);
+		gpu::sha1_prepare(input_buffer, d_input_buffer, input_buffer_size, output, d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();
@@ -101,7 +86,7 @@ namespace control_structure {
 		start_cpu_time = std::clock();
 
 		// run kernels
-		own_first_gpu_reference::sha1(d_input_buffer, input_buffer_size, d_output, amount_inputs);
+		gpu::sha1(d_input_buffer, input_buffer_size, d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();
@@ -117,7 +102,7 @@ namespace control_structure {
 		start_cpu_time = std::clock();
 
 		// copy back from and free gpu memory
-		own_first_gpu_reference::sha1_cleanup(input_buffer, d_input_buffer, input_buffer_size, output, d_output, amount_inputs);
+		gpu::sha1_cleanup(input_buffer, d_input_buffer, input_buffer_size, output, d_output, amount_inputs);
 
 		// "stopping" stopwatch
 		stop_wall_time = std::chrono::system_clock::now();

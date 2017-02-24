@@ -29,6 +29,6 @@ list(APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_50,code=sm_50")
 list(APPEND CUDA_NVCC_FLAGS "-std=c++11 -lineinfo")
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-list(APPEND SOURCES main.cc controls.cc cpu1.cc gpu1.cu helpers.cc)
+list(APPEND SOURCES main.cc controls.cc cpu.cc gpu.cu helpers.cc)
 cuda_add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${CUDA_LIBRARIES})

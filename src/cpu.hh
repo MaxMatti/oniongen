@@ -1,18 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <random>
-#include <string>
-#include <vector>
+#include <algorithm>
 #include <cstring>
-#include <cstdint>
-#include <climits>
 
-#ifndef __CPU1_HH__
-#define __CPU1_HH__
+#ifndef __CPU_HH__
+#define __CPU_HH__
 
-namespace own_first_cpu_reference {
+namespace cpu {
 	// swaps the endian of any datatype. Source: http://stackoverflow.com/a/4956493
 	template <typename T> T swap_endian(T u);
 

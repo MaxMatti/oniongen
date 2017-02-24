@@ -1,15 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <cstring>
-#include <cstdint>
-#include <climits>
 #include <cuda_runtime_api.h>
 #include <cuda.h>
 
-#ifndef __GPU1_HH__
-#define __GPU1_HH__
+#ifndef __GPU_HH__
+#define __GPU_HH__
 
 #define CUDA_CHECK(cmd) cuda_check(cmd, __FILE__, __LINE__, 0)
 #define CUDA_CHECK_FATAL(cmd) cuda_check(cmd, __FILE__, __LINE__, 1)
@@ -17,7 +10,7 @@
 
 void cuda_check(cudaError_t error, const char* file, int line, int fatal);
 
-namespace own_first_gpu_reference {
+namespace gpu {
 	// swaps the endian of any datatype. Source: http://stackoverflow.com/a/4956493
 	__device__ template <typename T> T swap_endian(T u);
 
@@ -33,7 +26,7 @@ namespace own_first_gpu_reference {
 	// calculates the sha1 sum
 	__global__ void d_sha1(unsigned char* input_buffer, unsigned int input_buffer_size, unsigned char* output, unsigned int threads);
 	
-	void sha1_allocate(unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
+	void sha1_allocate(unsigned int device, unsigned int total_input_size, unsigned int total_output_size, unsigned char** d_input_buffer, unsigned char** d_output_buffer);
 	
 	void sha1_prepare(unsigned char* h_input_buffer, unsigned char* d_input_buffer, unsigned int input_buffer_size, unsigned char* h_output, unsigned char* d_output, unsigned int threads);
 	

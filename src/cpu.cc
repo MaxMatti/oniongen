@@ -1,17 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <random>
-#include <string>
-#include <vector>
-#include <cstring>
 #include <cstdint>
 #include <climits>
 
-#include "cpu1.hh"
+#include "cpu.hh"
 
-namespace own_first_cpu_reference {
+namespace cpu {
 	// swaps the endian of any datatype. Source: http://stackoverflow.com/a/4956493
 	template <typename T> T swap_endian(T u) {
 		static_assert (CHAR_BIT == 8, "CHAR_BIT != 8");
